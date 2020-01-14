@@ -12,7 +12,7 @@ export default (sequelize, DataTypes) => {
     Request.belongsTo(models.Trip, { foreignKey: 'tripId', targetKey: 'tripId' });
   };
   Request.afterUpdate((data) => {
-    emitter.emit('request-updated', data);
+    emitter.emit('request-status-updated', data);
   });
   return Request;
 };

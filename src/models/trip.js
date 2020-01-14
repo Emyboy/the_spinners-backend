@@ -20,5 +20,8 @@ export default (sequelize, DataTypes) => {
   Trip.afterCreate(({ dataValues }) => {
     emitter.emit('request-created', dataValues);
   });
+  Trip.afterUpdate((data) => {
+    emitter.emit('request-updated', data);
+  });
   return Trip;
 };
