@@ -3,6 +3,7 @@ import ResponseService from '../services/response.service';
 import JwtService from '../services/jwt.service';
 import UserService from '../services/user.service';
 import TripService from '../services/trip.service';
+import CommentService from '../services/comment.service';
 
 /**
  * class for validations
@@ -175,6 +176,58 @@ class UserValidation {
     if (error) {
       const errMessages = error.details.map((err) => (err.message));
       ResponseService.setError(400, errMessages);
+      return ResponseService.send(res);
+    }
+    next();
+  }
+
+  /**
+   *
+   *
+   * @static
+   * @param {req} req
+   * @param {res} res
+   * @param {next} next
+   * @returns {validation} This function validate view comments route
+   * @memberof UserValidation
+   */
+  static async validateViewComment(req, res, next) {
+    const page = parseInt(req.query.page, 10);
+    const limit = parseInt(req.query.limit, 10);
+
+    const schema = Joi.object({
+      tripId: Joi.number().greater(0).required(),
+      page: Joi.number().greater(0).required()
+        .messages({
+          'number.greater': 'Page must be greater than 0',
+          'object.unknown': `${page} is not allowed`,
+          'any.required': 'Page is required',
+          'number.base': 'Page must be a number'
+        }),
+      limit: Joi.number().greater(0).required()
+        .messages({
+          'number.greater': 'Limit must be greater than 0',
+          'object.unknown': `${limit} is not allowed`,
+          'any.required': 'Limit is required',
+          'number.base': 'Limit must be a number'
+        })
+    }).options({ abortEarly: false });
+
+    const { error } = schema.validate({ ...req.params, ...req.query });
+    if (error) {
+      const { details } = error;
+      const errors = details.map(({ message }) => message.replace(/[^a-zA-Z0-9 .-]/g, ''));
+      ResponseService.setError(400, errors);
+      return ResponseService.send(res);
+    }
+
+    const comment = await CommentService.findCommentByProperty({
+      userId: req.userData.id,
+      subjectId: req.params.tripId
+    });
+
+    if (!comment) {
+      ResponseService.setError(404, 'Comments not found or does not belong to this trip');
       return ResponseService.send(res);
     }
     next();
