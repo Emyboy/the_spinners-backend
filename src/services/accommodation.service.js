@@ -1,7 +1,7 @@
 import models from '../models';
 
 
-const { Accommodation, Booking, AccommodationType, Rooms } = models;
+const { Accommodation, Booking, AccommodationType, Rooms, likes } = models;
 
 /**
  *
@@ -112,6 +112,29 @@ class AccommodationService {
   static findBookingByProperty(property) {
     return Booking.findAll({
       where: property
+    });
+  }
+
+  /**
+       *
+       *
+       * @static
+       * @param {newAccommodationLike} newAccommodationLike
+       * @returns {newAccommodationLike} @memberof AccommodationService
+       */
+  static createAccommodationReaction(newAccommodationLike) {
+    return likes.create(newAccommodationLike);
+  }
+
+  /** find accommodation by property
+* @static
+* @param {object} property
+* @memberof AccommodationService
+* @returns {object} data
+*/
+  static findAccommodationReactionRecordByProperty(property) {
+    return likes.findAll({
+      where: { ...property }
     });
   }
 }
